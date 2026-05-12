@@ -108,6 +108,8 @@ public class PersonTests
     [Test]
     public void IncreaseSalary_SmallerThanMinusTenPerc_ShouldFail()
     {
-        // throw new NotImplementedException();
+        var sut = PersonFactory.CreateTestPerson();
+        Action act = () => sut.IncreaseSalary(-10);
+        act.Should().Throw<ArgumentOutOfRangeException>();
     }
 }
