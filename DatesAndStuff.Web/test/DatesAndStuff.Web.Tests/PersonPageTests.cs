@@ -123,6 +123,32 @@ public class PersonPageTests
         var salaryAfterSubmission = double.Parse(salaryLabel.Text);
         salaryAfterSubmission.Should().BeApproximately(expectedSalary, 0.001);
     }
+    
+    [Test]
+    public void SalaryIncrease_UnderMinusTen_ShouldShowErrors()
+    {
+        // Arrange
+        driver.Navigate().GoToUrl(BaseURL);
+        driver.FindElement(By.XPath("//*[@data-test='PersonPageNavigation']")).Click();
+
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+        // Act
+        var input = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
+        input.Clear();
+        input.SendKeys("-15");
+
+        var submitButton = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']")));
+        submitButton.Click();
+
+        // Assert
+        var topError = wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".validation-errors, .validation-summary-errors")));
+        topError.Displayed.Should().BeTrue("Az oldal tetejen megkene jelenjen a hiba uzenet!");
+
+        var fieldError = wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".validation-message")));
+        fieldError.Displayed.Should().BeTrue("A beviteli mezo alatt meg kene jelenjen peddig ez!");
+    }
+    
     private bool IsElementPresent(By by)
     {
         try
