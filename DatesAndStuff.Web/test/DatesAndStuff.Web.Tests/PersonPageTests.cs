@@ -98,7 +98,10 @@ public class PersonPageTests
     }
 
     [Test]
-    public void Person_SalaryIncrease_ShouldIncrease()
+    [TestCase(5, 5250)]
+    [TestCase(10, 5500)]
+    [TestCase(20, 6000)]
+    public void Person_SalaryIncrease_ShouldIncrease(double percentage, double expectedSalary)
     {
         // Arrange
         driver.Navigate().GoToUrl(BaseURL);
@@ -108,7 +111,7 @@ public class PersonPageTests
 
         var input = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
         input.Clear();
-        input.SendKeys("5");
+        input.SendKeys(percentage.ToString());
 
         // Act
         var submitButton = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']")));
@@ -118,8 +121,34 @@ public class PersonPageTests
         // Assert
         var salaryLabel = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='DisplayedSalary']")));
         var salaryAfterSubmission = double.Parse(salaryLabel.Text);
-        salaryAfterSubmission.Should().BeApproximately(5250, 0.001);
+        salaryAfterSubmission.Should().BeApproximately(expectedSalary, 0.001);
     }
+    
+    [Test]
+    public void SalaryIncrease_UnderMinusTen_ShouldShowErrors()
+    {
+        // Arrange
+        driver.Navigate().GoToUrl(BaseURL);
+        driver.FindElement(By.XPath("//*[@data-test='PersonPageNavigation']")).Click();
+
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+        // Act
+        var input = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
+        input.Clear();
+        input.SendKeys("-10");
+
+        var submitButton = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']")));
+        submitButton.Click();
+
+        // Assert
+        var topError = wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".validation-errors, .validation-summary-errors")));
+        topError.Displayed.Should().BeTrue("Az oldal tetejen megkene jelenjen a hiba uzenet!");
+
+        var fieldError = wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".validation-message")));
+        fieldError.Displayed.Should().BeTrue("A beviteli mezo alatt meg kene jelenjen peddig ez!");
+    }
+    
     private bool IsElementPresent(By by)
     {
         try

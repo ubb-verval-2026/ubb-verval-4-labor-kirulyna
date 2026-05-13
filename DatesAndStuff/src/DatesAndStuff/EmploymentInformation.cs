@@ -14,6 +14,7 @@
 
         public void IncreaseSalary(double percentage)
         {
+            //de what me jol van
             if (percentage <= -10)
                 throw new ArgumentOutOfRangeException(nameof(percentage));
 
