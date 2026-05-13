@@ -39,7 +39,12 @@ public class BlazeDemoTests
         
         driver.FindElement(By.CssSelector("input[type='submit']")).Click();
 
-        var rows = driver.FindElements(By.CssSelector("table.table tbody tr"));
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        
+        var rows = wait.Until(d => {
+            var foundRows = d.FindElements(By.CssSelector("table.table tbody tr"));
+            return foundRows.Count > 0 ? foundRows : null;
+        });
         
         rows.Count.Should().BeGreaterThanOrEqualTo(3, "legalabb 3 jaratot vartunk Mexico City es Dublin kozott.");
 
